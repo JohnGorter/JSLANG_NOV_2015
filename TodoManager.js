@@ -12,36 +12,40 @@ var com;
 // use an iife to create a local scope
 // and populate the todoapp object... 
 (function(ns, undefined){
-	
 	// inner fields 
-	var todos = []; 
-	var id = 0; 
-
-	function Todo(t, d){ this.id = ++id; this.title = t; this.description = d; }
+	var todos = [];
+	var filter = {}; 
 	
-	ns.getTodos   = function() { 
-		return todos; 
+	ns.getTodos = function() {
+		var todosresult = [];
+		for (var t in todos)
+		{
+			if (todos[t].match(filter)) 
+				todosresult.push(todos[t]);
+		} 
+		return todosresult; 
 	}
-
-	ns.insertTodo = function(t, d) { 
-		todos.push (new Todo(t, d));
+	
+	ns.insertTodo = function(t, d) { todos.push (new com.johngorter.todoapp.Todo(t, d)); }
+    ns.getTodo = function(id) {
+		for(var todo in todos)
+		  if (todos[todo].match({id:id})) return todos[todo];
+  	    return undefined;
 	}
-
-	ns.getTodo    = function(id) { 
-		var todofiltered = todos.filter(function (t) { 
-			return t.id === id; 
-			}); 
-		return todofiltered[0]; 
-	}
-
     ns.deleteTodo = function(id) { 
 		var todo = ns.getTodo(id); 
-		if (todo !== undefined) { 
-			todos.splice(todos.indexOf(todo),1);
-		}
+		todo.delete(todos);
 	}
-	
-})((com = com || {}, com.johngorter = com.johngorter || {}, com.johngorter.todoapp = com.johngorter.todoapp || {}));
+	ns.markTodo = function(id) {
+    	var todo = ns.getTodo(id); 
+		todo.markDone();
+	}
+	ns.setFilter = function(filterobject) {
+		filter = filterobject;
+	}
+})((com = com || {}, 
+    com.johngorter = com.johngorter || {}, 
+    com.johngorter.todoapp = com.johngorter.todoapp || {}));
 
 
 	
