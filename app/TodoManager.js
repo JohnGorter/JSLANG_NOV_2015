@@ -26,7 +26,7 @@ var com;
 		return todosresult; 
 	}
 	
-	ns.insertTodo = function(t, d) { todos.push (new com.johngorter.todoapp.Todo(t, d)); }
+	ns.insertTodo = function(t, d) { todos.push (new Todo(t, d)); }
     ns.getTodo = function(id) {
 		for(var todo in todos)
 		  if (todos[todo].match({id:id})) return todos[todo];
