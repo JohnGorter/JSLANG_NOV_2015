@@ -17,9 +17,6 @@ var Todo = (function () {
     Todo.prototype.markDone = function () {
         var _this = this;
         this.done = true;
-        window.setInterval(function () {
-            console.log("this: " + _this.title);
-        }, 1000);
     };
     Todo.prototype.toString = function () {
         return this.done ? "<span style='text-decoration: line-through;'>" + this.title + "<span>" : this.title;

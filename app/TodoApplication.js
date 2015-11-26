@@ -10,33 +10,32 @@
 var TodoApplication = function() { 
 	
 	// private fields...
-	var selected_id;
-	var completed = false;
+	var selected_id, filter={}, completed = false;
 	
 	// private functions...
-	function InsertTodo (){
-		com.johngorter.todoapp.insertTodo(
-			document.getElementById("title").value, 
-			document.getElementById("description").value
-		);
-		refreshList();
+	function InsertTodo (title, description){
+		if ("done" in filter){
+		    completed = false
+			com.johngorter.todoapp.setFilter({done:completed});
+		}
+		if (title && description){
+			com.johngorter.todoapp.insertTodo(title, description);
+			refreshList();
+		}			
+		else {
+			com.johngorter.todoapp.insertTodo($("#t").val(), $("#d").val());
+			$("#dialog").dialog('close');	
+			refreshList(1);
+		}
 	}
 	
 	function showDetails(id){
-		if (id > 0){
-			var todo = com.johngorter.todoapp.getTodo(id);
-			selected_id = id;
-			document.getElementById("detail_title").innerHTML = todo.title;
-			document.getElementById("detail_description").innerHTML = todo.description;
-			document.getElementById("btnDelete").style.display = 'inline';
-			document.getElementById("btnDone").style.display = 'inline';
-		} else {
-			document.getElementById("detail_title").innerHTML = "";
-			document.getElementById("detail_description").innerHTML = "";
-			document.getElementById("btnDelete").style.display = 'none';
-			document.getElementById("btnDone").style.display = 'none';
-			selected_id = -1;
-		}
+		if ((selected_id = id) > 0){
+			var todo =  com.johngorter.todoapp.getTodo(id); 
+			$("#dt").html(todo.title);
+			$("#dd").html(todo.description);
+			$("#details").fadeIn();
+		} else $("#details").fadeOut();
 	}
 
 	function deleteTodo(){
@@ -47,15 +46,15 @@ var TodoApplication = function() {
 		}
 	}
 
-	function refreshList() {
-		var list = document.getElementById("listTodo");
-		list.innerHTML = '';
+	function refreshList(animate) {
+		$("#list").html('');
 		var todos = com.johngorter.todoapp.getTodos();
-		for (var todo in todos)	{
-			var li = document.createElement("li");
-			li.innerHTML = '<span onclick="TodoApplication.showDetails(' + todos[todo].id + ');">' + todos[todo] + '</span>';
-			list.appendChild(li);
-		} 
+		$(todos).each(function(i, t){
+			var $li = $("<li>").html(t.toString()).click(function(){showDetails(t.id);}).appendTo("#list");
+			if (i == todos.length-1 && animate) {
+				$li.animate({fontSize:'40px'}, 500).animate({fontSize:'14px'},500);
+			}
+		})
 	}
 	function markTodo(){
 		if (selected_id > 0){
@@ -66,8 +65,13 @@ var TodoApplication = function() {
 	}
 	function showList(){
 		completed = !completed;
-		com.johngorter.todoapp.setFilter({done:completed});
-		document.getElementById("btnToggle").innerText = completed ? 'filter on incompleted' : 'filter on completed';
+		filter = $(this).attr('id') == "btnR" ? {} : {done:completed};
+		com.johngorter.todoapp.setFilter(filter);
+		if ("done" in filter)
+			$("#btnR").fadeIn();
+		else 
+			$("#btnR").fadeOut();
+		
 		refreshList();
 	}
 	
@@ -80,3 +84,22 @@ var TodoApplication = function() {
 	}
 }(); 
 
+$(function(){
+	
+	$("#btnA").click(TodoApplication.insertTodo);
+	$("#btnT").click(TodoApplication.showList);
+	$("#btnDe").click(TodoApplication.deleteTodo);
+	$("#btnDo").click(TodoApplication.markTodo);
+	$("#btnR").click(TodoApplication.showList);
+	$("#btnAddTodo").click(function(){
+		$("#dialog").dialog('open');	
+	}); 
+	
+	$("#dialog").dialog({autoOpen:false, modal:true}); 
+	
+	$.ajax({url:'/todos', dataType:'json', success:function(data){
+		for (d in data){
+			TodoApplication.insertTodo(data[d].title, data[d].description);
+		}
+	}});
+}); 

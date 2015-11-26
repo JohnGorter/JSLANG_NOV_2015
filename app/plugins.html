@@ -1,0 +1,49 @@
+<html>
+	<head>
+		<script src="https://code.jquery.com/jquery-1.11.3.js" type="text/javascript"></script>
+	</head>
+<style>
+	input {position:relative}
+</style>
+ 	<script>
+		 
+		 (function($){
+			 $.extend($.expr[":"], {
+				 dirty: function(e){
+					 return $(e).data('dirty');
+				 }
+			 }); 
+
+			 // wrapped set function
+			 $.fn.trackDirty = function(){
+				 // register the change function for each element on te list
+				 this.change(function(){ 
+					 $(this).data('dirty', 'true');
+				});
+				 // remain the chain 
+				 return this;
+			 }
+		 })(jQuery);
+		 
+		// main
+		 $(function(){
+			 
+			 $("input").trackDirty();
+			 
+			 $("#btnA").click(function(){
+				$("input:dirty").animate({left:'500px'}, 150).animate({left:'0px'}, 150); 
+			 }); 
+			  
+		 });
+	 </script>		
+	<body>
+		<div class="block">
+			<dl>
+			<dt>Title:</dt>
+			<dd><input type="text" name="title" id="t" /></dd>		
+			<dt>Description:</dt>
+			<dd><input type="text" name="description" id="d" /></dd> <br/>
+			<button id="btnA" class="btn btn-primary" >Save todo</button>
+		</div>
+	</body>
+</html>
